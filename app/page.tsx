@@ -20,8 +20,8 @@ export default function Home() {
   };
 
   // Count occurrences of each letter
-  const countOccurrences = (arr) => {
-    return arr.reduce((acc, letter) => {
+  const countOccurrences = (arr:any) => {
+    return arr.reduce((acc:any, letter:any) => {
       acc[letter] = (acc[letter] || 0) + 1;
       return acc;
     }, {});
