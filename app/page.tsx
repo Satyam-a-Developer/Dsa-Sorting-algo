@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useEffect } from "react";
 import { gsap } from "gsap";
@@ -18,9 +19,19 @@ export default function Home() {
     setAlphabet(sorted);
   };
 
+  // Count occurrences of each letter
+  const countOccurrences = (arr) => {
+    return arr.reduce((acc, letter) => {
+      acc[letter] = (acc[letter] || 0) + 1;
+      return acc;
+    }, {});
+  };
+
+  // Get the occurrences count
+  const letterCounts = countOccurrences(alphabet);
+
   // Trigger animation when alphabet changes
   useEffect(() => {
-    // Ensure animation is only triggered when alphabet updates
     if (alphabet.length > 0) {
       gsap.fromTo(
         ".alphabet-letter",
@@ -41,11 +52,9 @@ export default function Home() {
       <nav className="flex flex-col gap-8 items-center sm:items-start text-red-500 ">
         <ul className="pl-5 list-none bg-blue-300 p-10 rounded-lg">
           <li>Sorting Algorithms</li>
-          <li>bubble sort</li>
-          <li>selection sort</li>
-          <li>insertion sort</li>
-          <li>merge sort</li>
-          <li>quick sort</li>
+          <li>Data Structures</li>
+          <li>Algorithm Analysis</li>
+          <li>Big O Notation</li>
         </ul>
       </nav>
       <input
@@ -65,8 +74,8 @@ export default function Home() {
           <span
             key={`${letter}-${index}`}
             className={`alphabet-letter absolute flex justify-center items-center text-lg font-bold h-[80vh] rounded-lg ${
-              targetOrder.includes(letter) ? "bg-green-500 h-[30vh]" : "bg-red-500" 
-            }`}
+              targetOrder.includes(letter) ? "bg-green-500 h-[25vh]" : "bg-red-500"
+            } ${letterCounts[letter] > 1 ? "bg-yellow-500" : ""}`}
             style={{
               transform: `translateX(${index * 50}px)`, // Initial position for the letter
               width: "30px", // Reduced width
@@ -79,6 +88,3 @@ export default function Home() {
     </div>
   );
 }
-
-
-
