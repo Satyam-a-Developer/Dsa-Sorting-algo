@@ -41,9 +41,11 @@ export default function Home() {
       <nav className="flex flex-col gap-8 items-center sm:items-start text-red-500 ">
         <ul className="pl-5 list-none bg-blue-300 p-10 rounded-lg">
           <li>Sorting Algorithms</li>
-          <li>Data Structures</li>
-          <li>Algorithm Analysis</li>
-          <li>Big O Notation</li>
+          <li>bubble sort</li>
+          <li>selection sort</li>
+          <li>insertion sort</li>
+          <li>merge sort</li>
+          <li>quick sort</li>
         </ul>
       </nav>
       <input
@@ -77,3 +79,6 @@ export default function Home() {
     </div>
   );
 }
+
+
+
