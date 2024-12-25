@@ -81,7 +81,7 @@ export default function Page() {
   async function insertionSort(arr: number[]) {
     const sortedArr = [...arr];
     for (let i = 1; i < sortedArr.length; i++) {
-      let current = sortedArr[i];
+      const current = sortedArr[i];
       let j = i - 1;
 
       setActiveIndicesinteration([i]);
