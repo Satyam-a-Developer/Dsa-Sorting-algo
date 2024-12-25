@@ -5,6 +5,7 @@ export default function Page() {
   const [newArray, setNewArray] = useState<number[]>([]);
   const [sorting, setSorting] = useState(false);
   const [algorithm, setAlgorithm] = useState("  ");
+  const [activeIndices, setActiveIndices] = useState<number[]>([]);
 
   // Generate random numbers on the client side after the component mounts
   useEffect(() => {
@@ -14,6 +15,7 @@ export default function Page() {
 
   // Bubble Sort Function
   async function bubbleSortWithVisual(arr: number[]) {
+ 
     const sortedArr = [...arr];
     const n = sortedArr.length;
 
@@ -24,6 +26,7 @@ export default function Page() {
           const temp = sortedArr[j];
           sortedArr[j] = sortedArr[j + 1];
           sortedArr[j + 1] = temp;
+          setActiveIndices([j, j + 1]);
 
           // Update the state for visualization
           setNewArray([...sortedArr]);
@@ -136,7 +139,7 @@ export default function Page() {
             height: `${value * 5}px`,
             transition: "height 0.3s ease, transform 0.3s ease",
             transform: sorting ? "scale(1.1)" : "scale(1)",
-            backgroundColor: sorting ? "red" : "purple",
+            backgroundColor: activeIndices.includes(index) ? "red" : "blue",
           }}
         >
           {value}
