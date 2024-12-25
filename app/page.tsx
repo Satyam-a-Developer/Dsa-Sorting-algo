@@ -1,25 +1,33 @@
-'use client'
+"use client";
 import React, { useEffect, useState } from "react";
 
 export default function Page() {
   const [newArray, setNewArray] = useState<number[]>([]);
   const [sorting, setSorting] = useState(false);
-  const [algorithm, setAlgorithm] = useState("  ");
+  const [algorithm, setAlgorithm] = useState("bubble");
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
+  const [activeIndicesinsertion, setActiveIndicesinteration] = useState<
+    number[]
+  >([]);
+  const [stageText, setStageText] = useState("");
+  const [activeIndicesQuick, setActiveIndicesQuick] = useState<number[]>([]);
 
-  // Generate random numbers on the client side after the component mounts
-  useEffect(() => {
-    const generatedArray = Array.from({ length: 10 }, () => Math.floor(Math.random() * 100));
+  function generateNewArray() {
+    const generatedArray = Array.from({ length: 4 }, () =>
+      Math.floor(Math.random() * 100)
+    );
     setNewArray(generatedArray);
+  }
+
+  useEffect(() => {
+    generateNewArray();
   }, []);
 
-  // Bubble Sort Function
-  async function bubbleSortWithVisual(arr: number[]) {
- 
+  async function bubbleSort(arr: number[]) {
+
     const sortedArr = [...arr];
     const n = sortedArr.length;
 
-    setSorting(true);
     for (let i = 0; i < n - 1; i++) {
       for (let j = 0; j < n - i - 1; j++) {
         if (sortedArr[j] > sortedArr[j + 1]) {
@@ -27,125 +35,169 @@ export default function Page() {
           sortedArr[j] = sortedArr[j + 1];
           sortedArr[j + 1] = temp;
           setActiveIndices([j, j + 1]);
-
-          // Update the state for visualization
+          setStageText(`Comparing indices ${j} with ${j + 1}`);
+          console.log(j, j + 1, "bubble");
           setNewArray([...sortedArr]);
-          await new Promise((resolve) => setTimeout(resolve, 300)); // Add delay for animation
+          await new Promise((resolve) => setTimeout(resolve, 1300));
         }
       }
     }
+  }
+
+  async function quickSort(arr: number[], start = 0, end = arr.length - 1) {
+    if (start >= end) return;
+
+    const pivot = arr[end];
+    let pivotIndex = start;
+
+    setActiveIndicesQuick([end]);
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    for (let i = start; i < end; i++) {
+      if (arr[i] <= pivot) {
+        const temp = arr[i];
+        arr[i] = arr[pivotIndex];
+        arr[pivotIndex] = temp;
+        setActiveIndices([i, pivotIndex]);
+        setStageText(`Comparing indices ${i} with ${pivotIndex}`);
+        console.log(i, pivotIndex);
+        setNewArray([...arr]);
+        await new Promise((resolve) => setTimeout(resolve, 1300));
+        pivotIndex++;
+      }
+    }
+
+    arr[end] = arr[pivotIndex];
+    arr[pivotIndex] = pivot;
+    setNewArray([...arr]);
+    console.log(end, pivotIndex, "quick");
+    await new Promise((resolve) => setTimeout(resolve, 700));
+
+    await quickSort(arr, start, pivotIndex - 1);
+    await quickSort(arr, pivotIndex + 1, end);
+  }
+
+  async function insertionSort(arr: number[]) {
+    const sortedArr = [...arr];
+    for (let i = 1; i < sortedArr.length; i++) {
+      let current = sortedArr[i];
+      let j = i - 1;
+
+      setActiveIndicesinteration([i]);
+      await new Promise((resolve) => setTimeout(resolve, 700));
+
+      while (j >= 0 && sortedArr[j] > current) {
+        sortedArr[j + 1] = sortedArr[j];
+        setActiveIndices([j, j + 1]);
+        setStageText(`Comparing indices ${j} with ${j + 1}`);
+        console.log(j, j + 1, "insertion");
+        setNewArray([...sortedArr]);
+        await new Promise((resolve) => setTimeout(resolve, 1300));
+        j--;
+      }
+      sortedArr[j + 1] = current;
+      setNewArray([...sortedArr]);
+      await new Promise((resolve) => setTimeout(resolve, 1300));
+    }
+    setActiveIndices([]);
+    setActiveIndicesinteration([]);
+  }
+
+  async function handleSort() {
+    setSorting(true);
+    if (algorithm === "bubble") {
+      await bubbleSort(newArray);
+    } else if (algorithm === "insertion") {
+      await insertionSort(newArray);
+    } else if (algorithm === "quick") {
+      alert(
+        "pick the last element as pivot compare with start index and swap if less than pivot"
+      );
+      const arrCopy = [...newArray];
+      await quickSort(arrCopy);
+      setNewArray(arrCopy);
+    }
+    setActiveIndices([]);
+    setActiveIndicesinteration([]);
+    setActiveIndicesQuick([]);
     setSorting(false);
   }
 
-  // Insertion Sort Function
-  // function insertionSort(arr: number[]): number[] {
-  //   const sortedArr = [...arr]; // Avoid mutating the original array
-  //   for (let i = 1; i < sortedArr.length; i++) {
-  //     let current = sortedArr[i];
-  //     let j = i - 1;
-  //     while (j >= 0 && sortedArr[j] > current) {
-  //       sortedArr[j + 1] = sortedArr[j];
-  //       console.log(sortedArr, "arr[j]");
-  //       j--;
-  //     }
-  //     sortedArr[j + 1] = current;
-  //   }
-  //   return sortedArr;
-  // }
+  const algorithmNames = {
+    bubble: "Bubble Sort",
+    insertion: "Insertion Sort",
+    quick: "Quick Sort",
+    merge: "Merge Sort (Coming Soon)",
+  };
 
-  // Quick Sort Function
-  // function quickSort(arr: number[]): number[] {
-  //   if (arr.length <= 1) return arr; // Base case
-
-  //   const pivot = arr[arr.length - 1];
-  //   const left: number[] = [];
-  //   const right: number[] = [];
-  //   for (let i = 0; i < arr.length - 1; i++) {
-  //     if (arr[i] < pivot) {
-  //       console.log(arr[i], "arr[i]", "left side push", "quicksort");
-  //       left.push(arr[i]);
-  //     } else {
-  //       console.log(arr[i], "arr[i]", "right side push", "quicksort");
-  //       right.push(arr[i]);
-  //     }
-  //   }
-  //   return [...quickSort(left), pivot, ...quickSort(right)];
-  // }
-
-  // Merge Sort Function
-  // function mergeSort(arr: number[]): number[] {
-  //   if (arr.length <= 1) return arr; // Base case
-
-  //   const mid = Math.floor(arr.length / 2);
-  //   const left = arr.slice(0, mid);
-  //   const right = arr.slice(mid);
-  //   return merge(mergeSort(left), mergeSort(right));
-  // }
-
-  // function merge(left: number[], right: number[]): number[] {
-  //   const result: number[] = [];
-  //   let i = 0,
-  //     j = 0;
-
-  //   while (i < left.length && j < right.length) {
-  //     if (left[i] < right[j]) {
-  //       result.push(left[i]);
-  //       console.log(left[i], "left[i]", "left side push", "merge");
-  //       i++;
-  //     } else {
-  //       result.push(right[j]);
-  //       console.log(right[j], "right[j]", "right side push", "merge");
-  //       j++;
-  //     }
-  //   }
-
-  //   return [...result, ...left.slice(i), ...right.slice(j)];
-  // }
-
-  // Example usage
-  // const data: number[] = [-2, 45, 3, 11, -9];
-  // console.log("Unsorted array:", data);
-  // const sortedData = bubbleSort(data);
-  // const sortedData2 = insertionSort(data);
-  // const sortedData3 = quickSort(data);
-  // const sortedData4 = mergeSort(data);
-
-  // console.log("Sorted array:", sortedData, "bubblesort");
-  // console.log("Sorted array:", sortedData2, "insertionsort");
-  // console.log("Sorted array:", sortedData3, "quicksort");
-  // console.log("Sorted array:", sortedData4, "mergesort");
   return (
     <div className="flex flex-col items-center gap-8 p-8 min-h-screen bg-gray-800">
-      <select className="text-xl bg-white p-2 rounded-lg" onChange={(e) => setAlgorithm(e.target.value)}>
-        <option value="bubble">Bubble Sort</option>
-        <option value="insertion">Insertion Sort</option>
-        <option value="quick">Quick_Sort</option>
-        <option value="merge">Merge_Sort</option>
+      <div className="text-[30px] text-slate-200">
+        {stageText}
+      </div>
+      <select
+        className="text-xl bg-white p-2 rounded-lg"
+        value={algorithm}
+        onChange={(e) => setAlgorithm(e.target.value)}
+      >
+        {Object.entries(algorithmNames).map(([key, name]) => (
+          <option key={key} value={key}>
+            {name}
+          </option>
+        ))}
       </select>
-    <h1 className="text-4xl font-bold text-red-600">{algorithm}</h1>
-    <button
-      onClick={() => bubbleSortWithVisual(newArray)}
-      disabled={sorting}
-      className={`px-6 py-3 rounded-lg text-white ${sorting ? 'bg-gray-500' : 'bg-blue-600 hover:bg-blue-700'} transition`}
-    >
-      {sorting ? "Sorting..." : "Sort Array"}
-    </button>
-    <div className="flex gap-2 mt-10">
-      {newArray.map((value, index) => (
-        <div
-          key={index}
-          className="w-10 bg-cyan-500 text-white text-center"
-          style={{
-            height: `${value * 5}px`,
-            transition: "height 0.3s ease, transform 0.3s ease",
-            transform: sorting ? "scale(1.1)" : "scale(1)",
-            backgroundColor: activeIndices.includes(index) ? "red" : "blue",
-          }}
-        >
-          {value}
-        </div>
-      ))}
+
+      <h1 className="text-4xl font-bold text-red-600">
+        {algorithmNames[algorithm as keyof typeof algorithmNames]}
+      </h1>
+
+      <button
+        onClick={handleSort}
+        disabled={sorting || algorithm === "merge"}
+        className={`px-6 py-3 rounded-lg text-white ${
+          sorting || algorithm === "merge"
+            ? "bg-gray-500"
+            : "bg-blue-600 hover:bg-blue-700"
+        } transition`}
+      >
+        {sorting ? "Sorting..." : "Sort Array"}
+      </button>
+
+      <button
+        onClick={generateNewArray}
+        disabled={sorting}
+        className="px-6 py-3 rounded-lg text-white bg-blue-700 hover:bg-blue-800 transition"
+      >
+        Generate New Array
+      </button>
+
+      <div className="flex gap-2 mt-10">
+        {newArray.map((value, index) => (
+          <div
+            key={index}
+            className="w-10 text-white text-center transition-all duration-300"
+            style={{
+              height: `${value * 5}px`,
+              transform:
+                activeIndices.includes(index) ||
+                activeIndicesinsertion.includes(index) ||
+                activeIndicesQuick.includes(index)
+                  ? "scale(1.1)"
+                  : "scale(1)",
+              backgroundColor: activeIndices.includes(index)
+                ? "#EF4444"
+                : activeIndicesinsertion.includes(index)
+                ? "#10B981"
+                : activeIndicesQuick.includes(index)
+                ? "#F59E0B"
+                : "#3B82F6",
+            }}
+          >
+            {value}
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
   );
 }
