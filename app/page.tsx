@@ -6,11 +6,7 @@ export default function Page() {
   const [sorting, setSorting] = useState(false);
   const [algorithm, setAlgorithm] = useState("bubble");
   const [activeIndices, setActiveIndices] = useState<number[]>([]);
-  const [activeIndicesinsertion, setActiveIndicesinteration] = useState<
-    number[]
-  >([]);
   const [stageText, setStageText] = useState("");
-  const [activeIndicesQuick, setActiveIndicesQuick] = useState<number[]>([]);
 
   function generateNewArray() {
     const generatedArray = Array.from({ length: 4 }, () =>
@@ -23,8 +19,50 @@ export default function Page() {
     generateNewArray();
   }, []);
 
-  async function bubbleSort(arr: number[]) {
+  async function mergeSort(arr: number[]): Promise<number[]> {
+    if (arr.length <= 1) return arr;
 
+    const mid = Math.floor(arr.length / 2);
+    const left = arr.slice(0, mid);
+    const right = arr.slice(mid);
+
+    setStageText(`Splitting array at index ${mid}`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    const leftSorted = await mergeSort(left);
+    const rightSorted = await mergeSort(right);
+    return merge(leftSorted, rightSorted);
+  }
+
+  async function merge(left: number[], right: number[]): Promise<number[]> {
+    const result: number[] = [];
+    let i = 0, j = 0;
+    const totalArray = [...newArray];
+    const leftStart = newArray.indexOf(left[0]);
+
+    while (i < left.length && j < right.length) {
+      setActiveIndices([leftStart + i, leftStart + left.length + j]);
+      setStageText(`Comparing ${left[i]} with ${right[j]}`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      if (left[i] < right[j]) {
+        result.push(left[i]);
+        i++;
+      } else {
+        result.push(right[j]);
+        j++;
+      }
+
+      const mergedPart = [...result, ...left.slice(i), ...right.slice(j)];
+      totalArray.splice(leftStart, mergedPart.length, ...mergedPart);
+      setNewArray([...totalArray]);
+    }
+
+    const finalResult = [...result, ...left.slice(i), ...right.slice(j)];
+    return finalResult;
+  }
+
+  async function bubbleSort(arr: number[]) {
     const sortedArr = [...arr];
     const n = sortedArr.length;
 
@@ -35,10 +73,9 @@ export default function Page() {
           sortedArr[j] = sortedArr[j + 1];
           sortedArr[j + 1] = temp;
           setActiveIndices([j, j + 1]);
-          setStageText(`Comparing indices ${j} with ${j + 1}`);
-          console.log(j, j + 1, "bubble");
+          setStageText(`Comparing ${sortedArr[j]} with ${sortedArr[j + 1]}`);
           setNewArray([...sortedArr]);
-          await new Promise((resolve) => setTimeout(resolve, 1300));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
     }
@@ -50,8 +87,8 @@ export default function Page() {
     const pivot = arr[end];
     let pivotIndex = start;
 
-    setActiveIndicesQuick([end]);
-
+    setActiveIndices([end]);
+    setStageText(`Pivot: ${pivot}`);
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     for (let i = start; i < end; i++) {
@@ -60,10 +97,9 @@ export default function Page() {
         arr[i] = arr[pivotIndex];
         arr[pivotIndex] = temp;
         setActiveIndices([i, pivotIndex]);
-        setStageText(`Comparing indices ${i} with ${pivotIndex}`);
-        console.log(i, pivotIndex);
+        setStageText(`Swapping ${arr[i]} with ${arr[pivotIndex]}`);
         setNewArray([...arr]);
-        await new Promise((resolve) => setTimeout(resolve, 1300));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         pivotIndex++;
       }
     }
@@ -71,7 +107,6 @@ export default function Page() {
     arr[end] = arr[pivotIndex];
     arr[pivotIndex] = pivot;
     setNewArray([...arr]);
-    console.log(end, pivotIndex, "quick");
     await new Promise((resolve) => setTimeout(resolve, 700));
 
     await quickSort(arr, start, pivotIndex - 1);
@@ -84,58 +119,57 @@ export default function Page() {
       const current = sortedArr[i];
       let j = i - 1;
 
-      setActiveIndicesinteration([i]);
+      setActiveIndices([i]);
+      setStageText(`Current element: ${current}`);
       await new Promise((resolve) => setTimeout(resolve, 700));
 
       while (j >= 0 && sortedArr[j] > current) {
         sortedArr[j + 1] = sortedArr[j];
         setActiveIndices([j, j + 1]);
-        setStageText(`Comparing indices ${j} with ${j + 1}`);
-        console.log(j, j + 1, "insertion");
+        setStageText(`Moving ${sortedArr[j]} right`);
         setNewArray([...sortedArr]);
-        await new Promise((resolve) => setTimeout(resolve, 1300));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         j--;
       }
       sortedArr[j + 1] = current;
       setNewArray([...sortedArr]);
-      await new Promise((resolve) => setTimeout(resolve, 1300));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     setActiveIndices([]);
-    setActiveIndicesinteration([]);
   }
 
   async function handleSort() {
     setSorting(true);
-    if (algorithm === "bubble") {
-      await bubbleSort(newArray);
-    } else if (algorithm === "insertion") {
-      await insertionSort(newArray);
-    } else if (algorithm === "quick") {
-      alert(
-        "pick the last element as pivot compare with start index and swap if less than pivot"
-      );
-      const arrCopy = [...newArray];
-      await quickSort(arrCopy);
-      setNewArray(arrCopy);
+    try {
+      if (algorithm === "bubble") {
+        await bubbleSort(newArray);
+      } else if (algorithm === "insertion") {
+        await insertionSort(newArray);
+      } else if (algorithm === "quick") {
+        const arrCopy = [...newArray];
+        await quickSort(arrCopy);
+        setNewArray(arrCopy);
+      } else if (algorithm === "merge") {
+        const sorted = await mergeSort([...newArray]);
+        setNewArray(sorted);
+      }
+    } finally {
+      setActiveIndices([]);
+      setStageText("");
+      setSorting(false);
     }
-    setActiveIndices([]);
-    setActiveIndicesinteration([]);
-    setActiveIndicesQuick([]);
-    setSorting(false);
   }
 
   const algorithmNames = {
     bubble: "Bubble Sort",
     insertion: "Insertion Sort",
     quick: "Quick Sort",
-    merge: "Merge Sort (Coming Soon)",
+    merge: "Merge Sort",
   };
 
   return (
     <div className="flex flex-col items-center gap-8 p-8 min-h-screen bg-gray-800">
-      <div className="text-[30px] text-slate-200">
-        {stageText}
-      </div>
+      <div className="text-[30px] text-slate-200">{stageText}</div>
       <select
         className="text-xl bg-white p-2 rounded-lg"
         value={algorithm}
@@ -154,11 +188,9 @@ export default function Page() {
 
       <button
         onClick={handleSort}
-        disabled={sorting || algorithm === "merge"}
+        disabled={sorting}
         className={`px-6 py-3 rounded-lg text-white ${
-          sorting || algorithm === "merge"
-            ? "bg-gray-500"
-            : "bg-blue-600 hover:bg-blue-700"
+          sorting ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"
         } transition`}
       >
         {sorting ? "Sorting..." : "Sort Array"}
@@ -179,18 +211,9 @@ export default function Page() {
             className="w-10 text-white text-center transition-all duration-300"
             style={{
               height: `${value * 5}px`,
-              transform:
-                activeIndices.includes(index) ||
-                activeIndicesinsertion.includes(index) ||
-                activeIndicesQuick.includes(index)
-                  ? "scale(1.1)"
-                  : "scale(1)",
+              transform: activeIndices.includes(index) ? "scale(1.1)" : "scale(1)",
               backgroundColor: activeIndices.includes(index)
                 ? "#EF4444"
-                : activeIndicesinsertion.includes(index)
-                ? "#10B981"
-                : activeIndicesQuick.includes(index)
-                ? "#F59E0B"
                 : "#3B82F6",
             }}
           >
